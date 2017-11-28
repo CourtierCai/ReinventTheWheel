@@ -110,13 +110,13 @@ public class EventBus {
             for (final Subscriber sub : localOnList) {
                  if (sub.getCls().isAssignableFrom(promulgator.getClass())) {
                      SubscriberModel model = sub.getSubscriberModel();
-                     hanleSubscriberModel(promulgator, entry, sub, model);
+                     hanledSubscriberModel(promulgator, entry, sub, model);
                  }
             }
         }
     }
 
-    private void hanleSubscriberModel(final Object promulgator, final Map.Entry entry, final Subscriber sub, SubscriberModel model) {
+    private void hanledSubscriberModel(final Object promulgator, final Map.Entry entry, final Subscriber sub, SubscriberModel model) {
         if (model.threadModle() == ThreadModel.THREAD_NORMAL) {
             invoke(sub.getMethod(), entry.getKey() ,promulgator);
         } else if (model.threadModle() == ThreadModel.THREAD_MAIN) {
