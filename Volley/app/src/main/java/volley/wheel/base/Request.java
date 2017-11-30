@@ -10,10 +10,10 @@ import volley.wheel.handle.HurResponse;
 
 public abstract class Request<T> {
       private URL url;
-      private T data;
+      private Class<T> data;
       private ICallDataBack<T> iCallDataBack;
 
-    public Request(URL url, T data, ICallDataBack<T> iCallDataBack) {
+    public Request(URL url, Class<T> data, ICallDataBack<T> iCallDataBack) {
         this.url = url;
         this.data = data;
         this.iCallDataBack = iCallDataBack;
@@ -23,7 +23,7 @@ public abstract class Request<T> {
         return url;
     }
 
-    public T getData() {
+    public Class<T> getData() {
         return data;
     }
 

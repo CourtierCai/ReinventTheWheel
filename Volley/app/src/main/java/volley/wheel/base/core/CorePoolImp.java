@@ -1,12 +1,15 @@
 package volley.wheel.base.core;
 
-import java.util.PriorityQueue;
+import android.util.Log;
+
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import volley.wheel.base.Task;
+import volley.wheel.invoke.Volley;
 
 /**
  * Created by Administrator on 2017/11/30.
@@ -15,26 +18,39 @@ import volley.wheel.base.Task;
 //进行线程发送处理处理
 public class CorePoolImp {
     //定义一个队列
-    private static PriorityQueue<Runnable> priorityQueue ;
+    private static LinkedBlockingDeque<Runnable> linkedBlockingDeque;
     //定义一个线程池
     private static ThreadPoolExecutor threadPoolExecutor;
 
     private static RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
         @Override
         public void rejectedExecution(Runnable runnable, ThreadPoolExecutor threadPoolExecutor) {
-            priorityQueue.add(runnable);
+            linkedBlockingDeque.add(runnable);
         }
     };
 
     static {
-        priorityQueue = new PriorityQueue<>();
-        threadPoolExecutor = new ThreadPoolExecutor(4,10,10, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10), rejectedExecutionHandler);
+        linkedBlockingDeque = new LinkedBlockingDeque<>();
+        //这里其实可以开5多个线程去做这个事情去执行runnable，让整个系统跑得更快一些。就跟volley一样
+        threadPoolExecutor = new ThreadPoolExecutor(5, 10, 10, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10), rejectedExecutionHandler);
         threadPoolExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 while (true) {
+
                     //拿到task的任务
-                    Runnable runnable = priorityQueue.poll();
+                    Runnable runnable = null;
+                    try {
+                        runnable = linkedBlockingDeque.take();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Log.i("CorePool", threadPoolExecutor.getCorePoolSize() + "");
+                    Log.i(Volley.TAG, "我是核心池中心 - 我拿到了任务");
+                    if (runnable == null) {
+                        Log.i(Volley.TAG, "我是核心池中心 - 我没有拿到了任务");
+                        continue;
+                    }
                     //执行task的run
                     runnable.run();
                 }
@@ -44,7 +60,7 @@ public class CorePoolImp {
 
     public static void execute(Task task) {
         if (task == null) throw new NullPointerException("Task is Null");
-        priorityQueue.add(task);
+        linkedBlockingDeque.add(task);
     }
 
 }
