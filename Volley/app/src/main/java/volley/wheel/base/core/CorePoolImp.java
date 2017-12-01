@@ -25,13 +25,15 @@ public class CorePoolImp {
     private static RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
         @Override
         public void rejectedExecution(Runnable runnable, ThreadPoolExecutor threadPoolExecutor) {
+            Log.i(CorePoolImp.class.getName(), "rejectedExecution");
             linkedBlockingDeque.add(runnable);
         }
     };
 
     static {
         linkedBlockingDeque = new LinkedBlockingDeque<>();
-        //这里其实可以开5多个线程去做这个事情去执行runnable，让整个系统跑得更快一些。就跟volley一样
+        //1，这里其实可以开5多个线程去做这个事情去执行runnable，让整个系统跑得更快一些。就跟volley一样
+        //2，直接在runnable提交--》这个可能是性能问题，假设我现在5个了，继续execute会一直的拒绝加入重复工作
         threadPoolExecutor = new ThreadPoolExecutor(5, 10, 10, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10), rejectedExecutionHandler);
         threadPoolExecutor.execute(new Runnable() {
             @Override
@@ -52,7 +54,9 @@ public class CorePoolImp {
                         continue;
                     }
                     //执行task的run
-                    runnable.run();
+                    threadPoolExecutor.execute(runnable);
+
+//                    runnable.run();
                 }
             }
         });
