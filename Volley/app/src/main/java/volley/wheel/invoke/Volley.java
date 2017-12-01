@@ -18,4 +18,9 @@ public class Volley {
         CorePoolImp.execute(task);
     }
 
+
+    public static void exit() {
+        CorePoolImp.clear();
+    }
+
 }

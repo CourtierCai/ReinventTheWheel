@@ -54,7 +54,9 @@ public class CorePoolImp {
                         continue;
                     }
                     //执行task的run
-                    threadPoolExecutor.execute(runnable);
+                    if (threadPoolExecutor != null){
+                        threadPoolExecutor.execute(runnable);
+                    }
 
 //                    runnable.run();
                 }
@@ -64,7 +66,19 @@ public class CorePoolImp {
 
     public static void execute(Task task) {
         if (task == null) throw new NullPointerException("Task is Null");
-        linkedBlockingDeque.add(task);
+        if (linkedBlockingDeque != null) {
+            linkedBlockingDeque.add(task);
+        }
+    }
+
+    public static  void  clear() {
+        if (linkedBlockingDeque != null) {
+            linkedBlockingDeque.clear();
+        }
+        if (threadPoolExecutor != null) {
+            threadPoolExecutor.shutdown();
+        }
+
     }
 
 }
